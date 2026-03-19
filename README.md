@@ -13,6 +13,12 @@ own.
 ![image](thumb.png)
 
 
+### Video Showcase
+
+https://www.youtube.com/watch?v=5Y65UWF-Vok<br>
+(switching happens at ~8 and ~42 seconds)
+
+
 ## 🛠 Usage
 
 - When inside your ship's terminal, drag the PB to your hotbar and select "Run".
@@ -33,7 +39,7 @@ Info Panel in the bottom right of the terminal.
 
 ## 💾 Download
 
-TODO: ADD STEAM WORKSHOP LINK
+https://steamcommunity.com/sharedfiles/filedetails/?id=3687620980
 
 
 ## Copyright
