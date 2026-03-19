@@ -1,0 +1,110 @@
+﻿
+/*
+    LCD Screen App Selector for Space Engineers
+
+    Copyright (C) 2026 Philipp Decker - kiminaze@yahoo.de
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+using System.Collections.Generic;
+using Sandbox.ModAPI.Ingame;
+using VRage.Game.GUI.TextPanel;
+using VRage.Game.ModAPI.Ingame.Utilities;
+
+namespace IngameScript
+{
+    public partial class Program : MyGridProgram
+    {
+        /*
+         * App Selector for LCD screens
+         * 
+         * - When inside your ship's terminal, drag the PB to your hotbar and select "Run".
+         * - Enter "<block name>" <screen number> "<app name>" where
+         *   - `block name` Name of the block with the LCD screen (e.g. Transparent LCD).
+         *   - `screen number` Zero based number of the screen (usually 0).
+         *   - `app name` Internal name of the app (not its display name!).
+         * - Example that works with a block named "MyLCD" and displays the clock:
+         *     "MyLCD" 0 "TSS_ClockAnalog"
+         * - Example that works with a block named "Transparent LCD" and displays the 
+         *   [Connector Align App](https://github.com/Kiminaze/SEConnectorAlignApp):
+         *     "Transparent LCD" 0 "ConnectorAlignApp"
+         * - Setting the app name to an empty string ("") removes any currently present app.
+         *     "MyLCD" 0 ""
+         * - Setting a non-existent app name results in the PB displaying all available app names in its 
+         *   Info Panel in the bottom right of the terminal.
+         */
+        MyCommandLine commandLine = new MyCommandLine();
+        public void Main(string argument, UpdateType updateSource)
+        {
+            if (!commandLine.TryParse(argument))
+            {
+                Echo($"[ERR] Could not parse arguments!");
+                return;
+            }
+
+            string blockName = commandLine.Argument(0);
+            if (blockName == null)
+            {
+                Echo($"[ERR] Could not parse first argument! Should be name of the block with the LCD panel.");
+                return;
+            }
+
+            int panelNum;
+            if (!int.TryParse(commandLine.Argument(1), out panelNum))
+            {
+                Echo($"[ERR] Could not parse second argument! Should be the number of the screen.");
+                return;
+            }
+
+            string appName = commandLine.Argument(2);
+            if (appName == null)
+            {
+                Echo($"[ERR] Could not parse third argument! Should be the app name.");
+                return;
+            }
+
+            IMyTerminalBlock block = GridTerminalSystem.GetBlockWithName(blockName);
+            if (block == null || !(block is IMyTextSurfaceProvider))
+            {
+                Echo($"[ERR] Could not find block named {blockName}!");
+                return;
+            }
+
+            IMyTextSurfaceProvider lcdBlock = (IMyTextSurfaceProvider)block;
+
+            if (panelNum >= lcdBlock.SurfaceCount)
+            {
+                Echo($"[ERR] Screen number is higher than the amount of LCD panels of this block. Starts at 0.");
+                return;
+            }
+
+            IMyTextSurface surface = lcdBlock.GetSurface(panelNum);
+
+            List<string> apps = new List<string>();
+            surface.GetScripts(apps);
+            if (appName != "" && !apps.Contains(appName))
+            {
+                Echo($"[ERR] App \"{appName}\" not found!\nCurrent: \"" + surface.Script + "\"\nAvailable app names:");
+                foreach (string app in apps)
+                    Echo(app);
+
+                return;
+            }
+
+            surface.ContentType = ContentType.SCRIPT;
+            surface.Script = appName;
+        }
+    }
+}
