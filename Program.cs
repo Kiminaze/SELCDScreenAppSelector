@@ -35,18 +35,22 @@ namespace IngameScript
          *   - `block name` Name of the block with the LCD screen (e.g. Transparent LCD).
          *   - `screen number` Zero based number of the screen (usually 0).
          *   - `app name` Internal name of the app (not its display name!).
+         *   - `content type` What content to display. Can be either "none", "text" or "image" (can be omitted
+         *      entirely for apps). Only taken into account when app name is "".
          * - Example that works with a block named "MyLCD" and displays the clock:
          *     "MyLCD" 0 "TSS_ClockAnalog"
          * - Example that works with a block named "Transparent LCD" and displays the 
          *   [Connector Align App](https://github.com/Kiminaze/SEConnectorAlignApp):
          *     "Transparent LCD" 0 "ConnectorAlignApp"
+         * - Example that works with a block named "MyLCD" and sets the screen to display text:
+         *     "MyLCD" 0 "" "text"
          * - Setting the app name to an empty string ("") removes any currently present app.
          *     "MyLCD" 0 ""
          * - Setting a non-existent app name results in the PB displaying all available app names in its 
          *   Info Panel in the bottom right of the terminal.
          */
-        MyCommandLine commandLine = new MyCommandLine();
-        public void Main(string argument, UpdateType updateSource)
+        private readonly MyCommandLine commandLine = new MyCommandLine();
+        public void Main(string argument)
         {
             if (!commandLine.TryParse(argument))
             {
@@ -74,6 +78,8 @@ namespace IngameScript
                 Echo($"[ERR] Could not parse third argument! Should be the app name.");
                 return;
             }
+
+            string content = commandLine.Argument(3);
 
             IMyTerminalBlock block = GridTerminalSystem.GetBlockWithName(blockName);
             if (block == null || !(block is IMyTextSurfaceProvider))
@@ -103,8 +109,29 @@ namespace IngameScript
                 return;
             }
 
-            surface.ContentType = ContentType.SCRIPT;
-            surface.Script = appName;
+            if (appName == "" && content != null && content != "")
+            {
+                switch (content)
+                {
+                    case "text":
+                    case "image":
+                        surface.ContentType = ContentType.TEXT_AND_IMAGE;
+                        break;
+
+                    case "none":
+                        surface.ContentType = ContentType.NONE;
+                        break;
+
+                    default:
+                        Echo($"[ERR] Content option \"{content}\" not found!");
+                        return;
+                }
+            }
+            else
+            {
+                surface.ContentType = ContentType.SCRIPT;
+                surface.Script = appName;
+            }
         }
     }
 }

@@ -22,15 +22,19 @@ https://www.youtube.com/watch?v=5Y65UWF-Vok<br>
 ## 🛠 Usage
 
 - When inside your ship's terminal, drag the PB to your hotbar and select "Run".
-- Enter `"<block name>" <screen number> "<app name>"` where
+- Enter `"<block name>" <screen number> "<app name>" ["content type"]` where
   - `block name` Name of the block with the LCD screen (e.g. `Transparent LCD`).
   - `screen number` Zero based number of the screen (usually `0`).
   - `app name` Internal name of the app (not its display name!).
+  - `content type` What content to display. Can be either "none", "text" or "image" (can be omitted
+    entirely for apps). Only taken into account when app name is "".
 - Example that works with a block named "MyLCD" and displays the clock:
 <br>`"MyLCD" 0 "TSS_ClockAnalog"`
 - Example that works with a block named "Transparent LCD" and displays the 
 [Connector Align App](https://github.com/Kiminaze/SEConnectorAlignApp):
 <br>`"Transparent LCD" 0 "ConnectorAlignApp"`
+- Example that works with a block named "MyLCD" and sets the screen to display text:
+<br>`"MyLCD" 0 "" "text"`
 - Setting the app name to an empty string (`""`) removes any currently present app.
 <br>`"MyLCD" 0 ""`
 - Setting a non-existent app name results in the PB displaying all available app names in its 
